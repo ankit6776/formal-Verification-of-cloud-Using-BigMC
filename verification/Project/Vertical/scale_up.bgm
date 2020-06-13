@@ -1,0 +1,180 @@
+%active SE : 3; 	#server
+%active VM : 2;		#virtual machine
+
+%active PC : 2;		#Space containing processor
+%active RAMC : 2;	#Space containing RAM
+%active DISCC : 2;	#Space containing DISC
+
+%active P: 1;		#stable processor
+%active PL: 1;		#overloaded processor
+%active PU: 1;		#underloaded processor
+
+%active RAM: 1;		#stable ram
+%active RAML: 1;	#overloaded ram
+%active RAMU: 1;	#underloaded ram
+
+%active DISC: 1;	#stable disc
+%active DISCU: 1;	#undeloaded disc
+%active DISCL: 1;	#overloaded disc
+
+
+%passive MO : 2; 	#monitor
+%passive EV : 1;	#evaluator
+%passive E : 2;		#effector
+
+#-------------------------links------------------------------
+%name e1;
+%name e2;
+%name e3;
+%name w;
+%name c;
+%name ee;
+
+#--------------------------reaction rules------------------------------
+%rule overload_processor P[e]|$0->PL[e]|$0;
+%rule overload_disc RAM[e]|$0->RAML[e]|$0;
+%rule overload_ram DISC[e]|$0->DISCL[e]|$0;
+
+%rule deploy_processor1 
+	VM[e1,e2].(
+			(PC[e2,e3].(PU[e3]|PU[e3]|$2))|$1
+		) -> 
+	VM[e1,e2].(
+			(PC[e2,e3].(PU[e3]|$2))|$1
+		);
+%rule deploy_processor2 
+	VM[e1,e2].(
+			(PC[e2,e3].(PU[e3]|P[e3]|$2))|$1
+		) ->
+	 VM[e1,e2].(
+			(PC[e2,e3].(P[e3]|$2))|$1
+		);
+
+%rule deploy_ram1 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAMU[e3]|RAMU[e3]|$2))|$1
+			) ->
+		 VM[e1,e2].(
+				(RAMC[e2,e3].(RAMU[e3]|$2))|$1
+			);
+%rule deploy_ram2 VM[e1,e2].(
+				(RAMC[e2,e3].(RAMU[e3]|RAMU[e3]|$2))|$1
+			) -> 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAMU[e3]|$2))|$1
+			);
+
+%rule deploy_disc1 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISCU[e3]|DISCU[e3]|$2))|$1
+			) -> 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISCU[e3]|$2))|$1
+			);
+%rule deploy_disc2 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISCU[e3]|DISC[e3]|$2))|$1
+			) ->
+		 VM[e1,e2].(
+				(DISCC[e2,e3].(DISC[e3]|$2))|$1
+			);
+
+%rule deploy_processor1 
+		VM[e1,e2].(
+				(PC[e2,e3].(PL[e3]|nil))|$1
+			) -> 
+		VM[e1,e2].(
+				(PC[e2,e3].(P[e3]|P[e3]|nil))|$1
+			);
+%rule deploy_processor2 
+		VM[e1,e2].(
+				(PC[e2,e3].(PL[e3]|PL[e3]|nil))|$1
+			) -> 
+		VM[e1,e2].(
+				(PC[e2,e3].(P[e3]|P[e3]|P[e3]|nil))|$1
+			);
+%rule deploy_processor3 
+		VM[e1,e2].(
+				(PC[e2,e3].(PL[e3]|PL[e3]|PL[e3]|nil))|$1
+			) -> 
+		VM[e1,e2].(
+				(PC[e2,e3].(P[e3]|P[e3]|P[e3]|P[e3]|nil))|$1
+			);
+
+%rule deploy_ram1 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAML[e3]|nil))|$1
+			) -> 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAM[e3]|RAM[e3]|nil))|$1
+			);
+%rule deploy_ram2 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAML[e3]|RAML[e3]|nil))|$1
+			) ->
+		 VM[e1,e2].(
+				(RAMC[e2,e3].(RAM[e3]|RAM[e3]|RAM[e3]|nil))|$1
+			);
+%rule deploy_ram3 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAML[e3]|RAML[e3]|RAML[e3]|nil))|$1
+			) -> 
+		VM[e1,e2].(
+				(RAMC[e2,e3].(RAM[e3]|RAM[e3]|RAM[e3]|RAM[e3]|nil))|$1
+			);
+
+%rule deploy_disc1 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISCL[e3]|nil))|$1
+			) ->
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISC[e3]|DISC[e3]|nil))|$1
+			);
+%rule deploy_disc2 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISCL[e3]|DISCL[e3]|nil))|$1
+			) ->
+		 VM[e1,e2].(
+				(DISCC[e2,e3].(DISC[e3]|DISC[e3]|DISC[e3]|nil))|$1
+			);
+%rule deploy_disc3 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISCL[e3]|DISCL[e3]|DISCL[e3]|nil))|$1
+			) -> 
+		VM[e1,e2].(
+				(DISCC[e2,e3].(DISC[e3]|DISC[e3]|DISC[e3]|DISC[e3]|nil))|$1
+			);
+
+
+
+
+
+#-----------------------model definition----------------------------------
+(MO[c,ee] | E[c,ee] | EV[ee]) | (SE[w,e1,c].(
+						VM[e1,e2].(
+								 (PC[e2,e3].P[e3]) |
+								 (DISCC[e2,e3].DISC[e3])|
+								 (RAMC[e2,e3].RAM[e3]) 
+							)
+						));
+
+#-----------------------------properties-----------------------------------------------
+%property elasticity size() >= $pred->size(); #system is growing
+
+%property p1 !matches((SE[w,e1,c].(P[e2]|$1))|$0);
+%property p2 !matches((SE[w,e1,c].(RAM[e2]|$1))|$0);
+%property p3 !matches((SE[w,e1,c].(DISC[e2]|$1))|$0);
+%property p4 !matches((VM[e1,e2].($2|(SE[w,e1,c].$0)))|$1);
+
+%property p5 !matches(MO[c,ee]|P[e2]|$0);
+%property p6 !matches(MO[c,ee]|DISC[e2]|$0);
+%property p7 !matches(MO[c,ee]|RAM[e2]|$0);
+
+%property p8 !matches(PU);		#Processor never goes under-load as we are increasing increasing workload
+%property p9 !matches(RAMU);		#RAM never goes under-load as we are increasing increasing workload
+%property p0 !matches(DISCU);		#DISC never goes under-load as we are increasing increasing workload
+
+
+%check
+
+

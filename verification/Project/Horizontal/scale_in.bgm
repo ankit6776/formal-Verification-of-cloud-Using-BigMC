@@ -1,0 +1,96 @@
+%active SE : 3;		#stable service-instace
+%active SEL : 3;	#overloaded service-instace
+%active SEU : 3;	#underloaded service-instace
+
+%active VM : 2;		#stable vm
+%active VML : 2;	#overloaded vm
+%active VMU : 2;	#underloaded vm
+
+%active SL : 1;		#overloaded server
+%active SU : 1;		#underloaded server
+%active S: 1;		#stable server
+
+%passive MO : 2; 	#monitor
+%passive EV : 1;	#evaluator
+%passive E : 2;		#effector
+
+#---------------links-------------------
+%name e1;
+%name e2;
+%name w;
+%name c;
+%name ee;
+
+#-----------------------reaction rules-------------------
+%rule underload_instance (S[x]) -> (SU[x]);
+%rule underload_vm  VM[e1,e2] -> VMU[e1,e2];
+%rule underload_server SE[w,e1,c].(nil) -> SEU[w,e1,c].(nil);
+
+%rule remove_service_instance SU[e2]|$1->$1;
+%rule deploy_new_service_instance
+	VM[e1,e2].(
+		SL[e2]
+	)->
+	VM[e1,e2].(
+		S[e2]|S[e2]
+	);
+
+
+%rule remove_vm (VMU[e1,e2].($1))|$2 -> $2;
+%rule deploy_new_vm  
+	SE[w,e1,c].(
+		VML[e1,e2].(SL[e2]|SL[e2])
+	)->
+	SE[w,e1,c].(
+		VM[e1,e2].(S[e2]) |
+		VM[e1,e2].(S[e2])
+	);
+
+
+%rule remove_server (SEU[w,e1,c].(nil))|$1 -> $1;
+
+%rule deploy_new_server 
+	SEL[w,e1,c].(
+		VML[e1,e2].(SL[e2]|SL[e2]) |
+		VML[e1,e2].(SL[e2]|SL[e2])
+	) ->
+	SE[w,e1,c].(
+		VM[e1,e2].(S[e2]|S[e2]) |
+		VM[e1,e2].(S[e2]|S[e2])
+	) |
+	 SE[w,e1,c].(
+		VM[e1,e2].(S[e2]|S[e2]) |
+	VM[e1,e2].(S[e2]|S[e2])
+	);
+
+#-----------------------model definition------------------------------
+(MO[c,ee] | E[c,ee] | EV[ee]) |
+(
+	SE[w,e1,c].(
+		 (VM[e1,e2].(
+			S[e2]|S[e2]
+			))|
+		(VM[e1,e2].(
+			S[e2]|S[e2]
+			)))
+)|
+(
+	SE[w,e1,c].(
+		VM[e1,e2].(
+			S[e2]|S[e2]
+			))
+);
+
+#-------------------------properties--------------------------------------------
+%property elasticity $pred->empty() || size() <= $pred->size();
+
+%property p1 !matches((SE[w,e1,c].(S[e2]|$1))|$0);
+%property p2 !matches((VM[e1,e2].($2|(SE[w,e1,c].$0)))|$1);
+%property p3 !matches(MO[c,ee]|S[e2]|$0);
+
+%property p4 !matches(SL); #Service insatance never goes overload as we are increasing workload
+%property p5 !matches(SEL); #Server never goes overload as we are increasing workload
+%property p6 !matches(VML); #VM never goes overload as we are increasing workload
+
+%check
+
